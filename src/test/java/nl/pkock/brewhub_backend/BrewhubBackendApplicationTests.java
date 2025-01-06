@@ -1,4 +1,4 @@
-package org.example.brewhubbackend;
+package nl.pkock.brewhub_backend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
