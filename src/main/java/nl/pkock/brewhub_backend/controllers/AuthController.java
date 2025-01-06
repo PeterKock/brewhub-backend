@@ -1,6 +1,7 @@
 package nl.pkock.brewhub_backend.controllers;
 
 import jakarta.validation.Valid;
+import nl.pkock.brewhub_backend.dto.AuthResponse;
 import nl.pkock.brewhub_backend.dto.LoginRequest;
 import nl.pkock.brewhub_backend.dto.SignUpRequest;
 import nl.pkock.brewhub_backend.models.User;
@@ -19,8 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -53,11 +52,15 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenProvider.generateToken(authentication);
 
-        Map<String, String> response = new HashMap<>();
-        response.put("accessToken", jwt);
-        response.put("tokenType", "Bearer");
+        User user = userRepository.findByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new AuthResponse(
+                jwt,
+                user.getId(),
+                user.getEmail(),
+                user.getRoles().iterator().next().name()
+        ));
     }
 
     @PostMapping("/signup")
@@ -78,8 +81,24 @@ public class AuthController {
                 : UserRole.USER;
         user.setRoles(Collections.singleton(role));
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
-        return ResponseEntity.ok("User registered successfully");
+        // Authenticate the user after registration
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        signUpRequest.getEmail(),
+                        signUpRequest.getPassword()
+                )
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = tokenProvider.generateToken(authentication);
+
+        return ResponseEntity.ok(new AuthResponse(
+                jwt,
+                savedUser.getId(),
+                savedUser.getEmail(),
+                savedUser.getRoles().iterator().next().name()
+        ));
     }
 }
