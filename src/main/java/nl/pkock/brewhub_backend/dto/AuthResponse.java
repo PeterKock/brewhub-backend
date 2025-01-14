@@ -15,11 +15,13 @@ public class AuthResponse {
     private Long id;
     private String email;
     private String role;
+    private String firstName;
 
-    public AuthResponse(String token, Long id, String email, String role) {
+    public AuthResponse(String token, Long id, String email, String role, String firstName) {
         this.token = token;
         this.id = id;
         this.email = email;
         this.role = role;
+        this.firstName = firstName;
     }
 }

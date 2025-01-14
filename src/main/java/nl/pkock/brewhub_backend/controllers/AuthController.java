@@ -59,7 +59,8 @@ public class AuthController {
                 jwt,
                 user.getId(),
                 user.getEmail(),
-                user.getRoles().iterator().next().name()
+                user.getRoles().iterator().next().name(),
+                user.getFirstName()
         ));
     }
 
@@ -98,7 +99,8 @@ public class AuthController {
                 jwt,
                 savedUser.getId(),
                 savedUser.getEmail(),
-                savedUser.getRoles().iterator().next().name()
+                savedUser.getRoles().iterator().next().name(),
+                savedUser.getFirstName()
         ));
     }
 }
