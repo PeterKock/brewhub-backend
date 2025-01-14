@@ -18,4 +18,6 @@ public class OrderDTO {
     private BigDecimal totalPrice;
     private String notes;
     private List<OrderItemDTO> items;
+    private BigDecimal retailerRating;
+    private Integer retailerTotalRatings;
 }

@@ -60,7 +60,9 @@ public class AuthController {
                 user.getId(),
                 user.getEmail(),
                 user.getRoles().iterator().next().name(),
-                user.getFirstName()
+                user.getFirstName(),
+                user.getAverageRating(),
+                user.getTotalRatings()
         ));
     }
 
@@ -100,7 +102,9 @@ public class AuthController {
                 savedUser.getId(),
                 savedUser.getEmail(),
                 savedUser.getRoles().iterator().next().name(),
-                savedUser.getFirstName()
+                savedUser.getFirstName(),
+                savedUser.getAverageRating(),
+                savedUser.getTotalRatings()
         ));
     }
 }

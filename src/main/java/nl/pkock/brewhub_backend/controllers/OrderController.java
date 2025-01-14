@@ -62,6 +62,8 @@ public class OrderController {
                 .collect(Collectors.toList());
 
         dto.setItems(itemDTOs);
+        dto.setRetailerRating(order.getRetailer().getAverageRating());
+        dto.setRetailerTotalRatings(order.getRetailer().getTotalRatings());
         return dto;
     }
 
