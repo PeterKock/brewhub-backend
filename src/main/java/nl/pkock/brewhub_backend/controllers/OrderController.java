@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -221,5 +223,84 @@ public class OrderController {
         orderRepository.save(order);
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/retailer/dashboard/stats")
+    @PreAuthorize("hasRole('RETAILER')")
+    public ResponseEntity<?> getRetailerDashboardStats(Authentication authentication) {
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        Long retailerId = userPrincipal.getId();
+
+        List<Order> allOrders = orderRepository.findByRetailerId(retailerId);
+
+        // Calculate stats
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("name", userPrincipal.getUsername());
+        stats.put("pendingOrders", allOrders.stream()
+                .filter(o -> o.getStatus() == OrderStatus.PENDING)
+                .count());
+        stats.put("completedOrders", allOrders.stream()
+                .filter(o -> o.getStatus() == OrderStatus.DELIVERED)
+                .count());
+        stats.put("totalProducts", ingredientRepository.findByRetailerId(retailerId).size());
+
+        return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/retailer/dashboard/recent-orders")
+    @PreAuthorize("hasRole('RETAILER')")
+    public ResponseEntity<List<OrderDTO>> getRetailerRecentOrders(Authentication authentication) {
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+
+        List<Order> allOrders = orderRepository.findByRetailerId(userPrincipal.getId());
+
+        // Get 5 most recent orders
+        List<Order> recentOrders = allOrders.stream()
+                .sorted((o1, o2) -> o2.getOrderDate().compareTo(o1.getOrderDate()))
+                .limit(5)
+                .toList();
+
+        return ResponseEntity.ok(recentOrders.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList()));
+    }
+
+    @GetMapping("/user/dashboard/stats")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> getUserDashboardStats(Authentication authentication) {
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        List<Order> allOrders = orderRepository.findByCustomerId(userPrincipal.getId());
+
+        // Calculate stats
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalOrders", allOrders.size());
+
+        // Count unique retailers
+        long favoriteRetailers = allOrders.stream()
+                .map(order -> order.getRetailer().getId())
+                .distinct()
+                .count();
+
+        stats.put("favoriteRetailers", favoriteRetailers);
+
+        return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/user/dashboard/recent-orders")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<OrderDTO>> getUserRecentOrders(Authentication authentication) {
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+
+        List<Order> allOrders = orderRepository.findByCustomerId(userPrincipal.getId());
+
+        // Get 5 most recent orders
+        List<Order> recentOrders = allOrders.stream()
+                .sorted((o1, o2) -> o2.getOrderDate().compareTo(o1.getOrderDate()))
+                .limit(5)
+                .toList();
+
+        return ResponseEntity.ok(recentOrders.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList()));
     }
 }
