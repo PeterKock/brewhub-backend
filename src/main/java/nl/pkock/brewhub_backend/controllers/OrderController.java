@@ -10,6 +10,7 @@ import nl.pkock.brewhub_backend.security.UserPrincipal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -69,6 +70,7 @@ public class OrderController {
 
     @PostMapping("/user/orders")
     @PreAuthorize("hasRole('USER')")
+    @Transactional
     public ResponseEntity<OrderDTO> createOrder(
             Authentication authentication,
             @Valid @RequestBody CreateOrderRequest request) {
@@ -108,7 +110,7 @@ public class OrderController {
             orderItems.add(orderItem);
             totalPrice = totalPrice.add(orderItem.getTotalPrice());
 
-            // Update ingredient quantity
+            // Updates ingredient quantity
             ingredient.setQuantity(ingredient.getQuantity().subtract(itemRequest.getQuantity()));
             ingredientRepository.save(ingredient);
         }
@@ -122,6 +124,7 @@ public class OrderController {
 
     @GetMapping("/user/orders")
     @PreAuthorize("hasRole('USER')")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<OrderDTO>> getUserOrders(Authentication authentication) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         List<Order> orders = orderRepository.findByCustomerId(userPrincipal.getId());
@@ -133,6 +136,7 @@ public class OrderController {
 
     @GetMapping("/retailer/orders")
     @PreAuthorize("hasRole('RETAILER')")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<OrderDTO>> getRetailerOrders(Authentication authentication) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         List<Order> orders = orderRepository.findByRetailerId(userPrincipal.getId());
@@ -144,6 +148,7 @@ public class OrderController {
 
     @PutMapping("/retailer/orders/{orderId}/status")
     @PreAuthorize("hasRole('RETAILER')")
+    @Transactional
     public ResponseEntity<OrderDTO> updateOrderStatus(
             Authentication authentication,
             @PathVariable Long orderId,
@@ -164,6 +169,7 @@ public class OrderController {
 
     @GetMapping("/user/orders/{orderId}")
     @PreAuthorize("hasRole('USER')")
+    @Transactional(readOnly = true)
     public ResponseEntity<OrderDTO> getUserOrder(
             Authentication authentication,
             @PathVariable Long orderId) {
@@ -181,6 +187,7 @@ public class OrderController {
 
     @GetMapping("/retailer/orders/{orderId}")
     @PreAuthorize("hasRole('RETAILER')")
+    @Transactional(readOnly = true)
     public ResponseEntity<OrderDTO> getRetailerOrder(
             Authentication authentication,
             @PathVariable Long orderId) {
@@ -198,6 +205,7 @@ public class OrderController {
 
     @DeleteMapping("/user/orders/{orderId}")
     @PreAuthorize("hasRole('USER')")
+    @Transactional
     public ResponseEntity<?> cancelOrder(
             Authentication authentication,
             @PathVariable Long orderId) {
@@ -229,6 +237,7 @@ public class OrderController {
 
     @GetMapping("/retailer/dashboard/stats")
     @PreAuthorize("hasRole('RETAILER')")
+    @Transactional(readOnly = true)
     public ResponseEntity<?> getRetailerDashboardStats(Authentication authentication) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         Long retailerId = userPrincipal.getId();
@@ -251,6 +260,7 @@ public class OrderController {
 
     @GetMapping("/retailer/dashboard/recent-orders")
     @PreAuthorize("hasRole('RETAILER')")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<OrderDTO>> getRetailerRecentOrders(Authentication authentication) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
@@ -269,6 +279,7 @@ public class OrderController {
 
     @GetMapping("/user/dashboard/stats")
     @PreAuthorize("hasRole('USER')")
+    @Transactional(readOnly = true)
     public ResponseEntity<?> getUserDashboardStats(Authentication authentication) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
         List<Order> allOrders = orderRepository.findByCustomerId(userPrincipal.getId());
@@ -290,6 +301,7 @@ public class OrderController {
 
     @GetMapping("/user/dashboard/recent-orders")
     @PreAuthorize("hasRole('USER')")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<OrderDTO>> getUserRecentOrders(Authentication authentication) {
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
