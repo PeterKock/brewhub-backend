@@ -31,6 +31,9 @@ public class User {
     private BigDecimal averageRating;
 
     @Column
+    private String location;
+
+    @Column
     private Integer totalRatings;
 
     @OneToMany(mappedBy = "retailer")
