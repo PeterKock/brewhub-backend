@@ -10,12 +10,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Collections;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/public")
 public class PublicController {
+
     private final UserRepository userRepository;
 
     public PublicController(UserRepository userRepository) {
@@ -24,7 +24,7 @@ public class PublicController {
 
     @GetMapping("/retailers")
     public ResponseEntity<List<RetailerDTO>> getRetailers() {
-        List<User> retailers = userRepository.findByRoles(Collections.singleton(UserRole.RETAILER));
+        List<User> retailers = userRepository.findByRolesContaining(UserRole.RETAILER);
         List<RetailerDTO> retailerDTOs = retailers.stream()
                 .map(retailer -> new RetailerDTO(
                         retailer.getId(),
