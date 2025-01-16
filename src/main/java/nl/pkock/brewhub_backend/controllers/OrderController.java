@@ -253,7 +253,9 @@ public class OrderController {
         stats.put("completedOrders", allOrders.stream()
                 .filter(o -> o.getStatus() == OrderStatus.DELIVERED)
                 .count());
-        stats.put("totalProducts", ingredientRepository.findByRetailerId(retailerId).size());
+        stats.put("shippedOrders", allOrders.stream()
+                .filter(o -> o.getStatus() == OrderStatus.SHIPPED)
+                .count());
 
         return ResponseEntity.ok(stats);
     }
