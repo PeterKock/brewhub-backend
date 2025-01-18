@@ -10,4 +10,5 @@ public class RatingDTO {
     private Integer score;
     private String comment;
     private LocalDateTime createdAt;
+    private Long orderId;
 }

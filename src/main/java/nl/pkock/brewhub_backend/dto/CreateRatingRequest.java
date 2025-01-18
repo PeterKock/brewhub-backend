@@ -11,4 +11,9 @@ public class CreateRatingRequest {
     private Integer score;
 
     private String comment;
+
+    @NotNull
+    private Long orderId;
+
+
 }

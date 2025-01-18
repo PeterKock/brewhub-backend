@@ -28,4 +28,8 @@ public class Rating {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private Order order;
 }

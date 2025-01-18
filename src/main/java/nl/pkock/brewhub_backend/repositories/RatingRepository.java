@@ -10,8 +10,9 @@ import java.util.Optional;
 @Repository
 public interface RatingRepository extends JpaRepository<Rating, Long> {
     List<Rating> findByRetailerId(Long retailerId);
-    Optional<Rating> findByRetailerIdAndCustomerId(Long retailerId, Long customerId);
+
 
     @Query("SELECT AVG(r.score) FROM Rating r WHERE r.retailer.id = :retailerId")
     Optional<Double> findAverageRatingByRetailerId(Long retailerId);
+    Optional<Rating> findByOrderId(Long orderId);
 }
