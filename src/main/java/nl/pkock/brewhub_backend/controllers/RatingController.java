@@ -7,9 +7,9 @@ import nl.pkock.brewhub_backend.models.Order;
 import nl.pkock.brewhub_backend.models.OrderStatus;
 import nl.pkock.brewhub_backend.models.Rating;
 import nl.pkock.brewhub_backend.models.User;
+import nl.pkock.brewhub_backend.repositories.OrderRepository;
 import nl.pkock.brewhub_backend.repositories.RatingRepository;
 import nl.pkock.brewhub_backend.repositories.UserRepository;
-import nl.pkock.brewhub_backend.repositories.OrderRepository;
 import nl.pkock.brewhub_backend.security.UserPrincipal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -42,6 +42,9 @@ public class RatingController {
         dto.setScore(rating.getScore());
         dto.setComment(rating.getComment());
         dto.setCreatedAt(rating.getCreatedAt());
+        if (rating.getOrder() != null) {
+            dto.setOrderId(rating.getOrder().getId());
+        }
         return dto;
     }
 
