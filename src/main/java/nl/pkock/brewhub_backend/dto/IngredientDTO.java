@@ -1,11 +1,15 @@
 package nl.pkock.brewhub_backend.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import nl.pkock.brewhub_backend.models.IngredientCategory;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class IngredientDTO {
     private Long id;
     private String name;
@@ -15,5 +19,5 @@ public class IngredientDTO {
     private BigDecimal price;
     private LocalDate expiryDate;
     private BigDecimal lowStockThreshold;
-    private boolean lowStock;
+    private boolean isLowStock;
 }

@@ -59,7 +59,10 @@ public class AuthController {
                 jwt,
                 user.getId(),
                 user.getEmail(),
-                user.getRoles().iterator().next().name()
+                user.getRoles().iterator().next().name(),
+                user.getFirstName(),
+                user.getAverageRating(),
+                user.getTotalRatings()
         ));
     }
 
@@ -70,11 +73,20 @@ public class AuthController {
                     .body("Email is already taken");
         }
 
+        // Check if location is provided for retailers
+        if (signUpRequest.getRole() != null &&
+                signUpRequest.getRole().equalsIgnoreCase("RETAILER") &&
+                (signUpRequest.getLocation() == null || signUpRequest.getLocation().trim().isEmpty())) {
+            return ResponseEntity.badRequest()
+                    .body("Location is required for retailers");
+        }
+
         User user = new User();
         user.setFirstName(signUpRequest.getFirstName());
         user.setLastName(signUpRequest.getLastName());
         user.setEmail(signUpRequest.getEmail());
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+        user.setLocation(signUpRequest.getLocation()); // Set the location
 
         UserRole role = signUpRequest.getRole() != null && signUpRequest.getRole().equalsIgnoreCase("RETAILER")
                 ? UserRole.RETAILER
@@ -98,7 +110,10 @@ public class AuthController {
                 jwt,
                 savedUser.getId(),
                 savedUser.getEmail(),
-                savedUser.getRoles().iterator().next().name()
+                savedUser.getRoles().iterator().next().name(),
+                savedUser.getFirstName(),
+                savedUser.getAverageRating(),
+                savedUser.getTotalRatings()
         ));
     }
 }

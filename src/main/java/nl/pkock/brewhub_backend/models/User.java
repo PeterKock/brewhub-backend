@@ -1,16 +1,9 @@
 package nl.pkock.brewhub_backend.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import java.math.BigDecimal;
 import lombok.Data;
+import java.util.List;
 
 import java.util.Set;
 
@@ -33,6 +26,18 @@ public class User {
 
     @Column(nullable = false)
     private String lastName;
+
+    @Column(precision = 3, scale = 2)
+    private BigDecimal averageRating;
+
+    @Column
+    private String location;
+
+    @Column
+    private Integer totalRatings;
+
+    @OneToMany(mappedBy = "retailer")
+    private List<Rating> receivedRatings;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
