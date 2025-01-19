@@ -229,6 +229,27 @@ public class InventoryController {
         }
     }
 
+    @GetMapping("/deleted")
+    @PreAuthorize("hasRole('RETAILER')")
+    public ResponseEntity<List<IngredientDTO>> getDeletedIngredients(Authentication authentication) {
+        Long retailerId = getRetailerId(authentication);
+        List<Ingredient> deletedIngredients = ingredientRepository.findByRetailerIdAndActiveFalse(retailerId);
+        return ResponseEntity.ok(convertToDTOList(deletedIngredients));
+    }
+
+    @PutMapping("/{id}/restore")
+    @PreAuthorize("hasRole('RETAILER')")
+    public ResponseEntity<IngredientDTO> restoreIngredient(
+            Authentication authentication,
+            @PathVariable Long id) {
+
+        Ingredient ingredient = getAndVerifyIngredient(authentication, id);
+        ingredient.setActive(true);
+        Ingredient restoredIngredient = ingredientRepository.save(ingredient);
+
+        return ResponseEntity.ok(convertToDTO(restoredIngredient));
+    }
+
     @PostMapping("/import")
     public ResponseEntity<?> importInventory(
             Authentication authentication,

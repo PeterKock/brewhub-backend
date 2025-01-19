@@ -11,6 +11,7 @@ import java.util.List;
 @Repository
 public interface IngredientRepository extends JpaRepository<Ingredient, Long> {
     List<Ingredient> findByRetailerIdAndActiveTrue(Long retailerId);
+    List<Ingredient> findByRetailerIdAndActiveFalse(Long retailerId);
 
     @Query("SELECT i FROM Ingredient i WHERE i.retailer.id = ?1 AND i.active = true AND " +
             "(LOWER(i.name) LIKE LOWER(CONCAT('%', ?2, '%')) OR " +
