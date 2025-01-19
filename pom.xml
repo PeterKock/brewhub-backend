@@ -78,16 +78,21 @@
             <version>0.11.5</version>
             <scope>runtime</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>5.7.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>6.2.1</version> <!-- Use the appropriate version for your project -->
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
@@ -95,6 +100,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
 
     <build>
         <plugins>

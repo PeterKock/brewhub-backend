@@ -35,6 +35,9 @@ public class Ingredient {
     @Column(name = "low_stock_threshold", nullable = false)
     private BigDecimal lowStockThreshold;
 
+    @Column(name = "active", nullable = false)
+    private Boolean active = true;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "retailer_id", nullable = false)
     private User retailer;
