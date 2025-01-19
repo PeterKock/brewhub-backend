@@ -1,5 +1,6 @@
 package nl.pkock.brewhub_backend.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import nl.pkock.brewhub_backend.dto.AuthResponse;
 import nl.pkock.brewhub_backend.dto.LoginRequest;
@@ -8,16 +9,14 @@ import nl.pkock.brewhub_backend.models.User;
 import nl.pkock.brewhub_backend.models.UserRole;
 import nl.pkock.brewhub_backend.repositories.UserRepository;
 import nl.pkock.brewhub_backend.security.JwtTokenProvider;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 
@@ -115,5 +114,33 @@ public class AuthController {
                 savedUser.getAverageRating(),
                 savedUser.getTotalRatings()
         ));
+    }
+
+    @GetMapping("/verify")
+    public ResponseEntity<?> verifyToken(HttpServletRequest request) {
+        try {
+            String token = request.getHeader("Authorization");
+            if (token != null && token.startsWith("Bearer ")) {
+                token = token.substring(7);
+                boolean isValid = tokenProvider.validateToken(token);
+                if (isValid) {
+                    Long userId = tokenProvider.getUserIdFromJWT(token);
+                    User user = userRepository.findById(userId)
+                            .orElseThrow(() -> new RuntimeException("User not found"));
+                    return ResponseEntity.ok(new AuthResponse(
+                            token,
+                            user.getId(),
+                            user.getEmail(),
+                            user.getRoles().iterator().next().name(),
+                            user.getFirstName(),
+                            user.getAverageRating(),
+                            user.getTotalRatings()
+                    ));
+                }
+            }
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 }
