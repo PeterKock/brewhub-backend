@@ -26,7 +26,7 @@ public class PublicController {
 
     @GetMapping("/retailers")
     public ResponseEntity<List<RetailerDTO>> getRetailers() {
-        List<User> retailers = userRepository.findByRolesContaining(UserRole.RETAILER);  // Use the containing method
+        List<User> retailers = userRepository.findByRolesContaining(UserRole.RETAILER);
         List<RetailerDTO> retailerDTOs = retailers.stream()
                 .map(retailer -> new RetailerDTO(
                         retailer.getId(),
@@ -41,7 +41,7 @@ public class PublicController {
 
     @GetMapping("/retailers/{retailerId}/ingredients")
     public ResponseEntity<List<IngredientDTO>> getRetailerIngredients(@PathVariable Long retailerId) {
-        List<Ingredient> ingredients = ingredientRepository.findByRetailerId(retailerId);
+        List<Ingredient> ingredients = ingredientRepository.findByRetailerIdAndActiveTrue(retailerId);
         List<IngredientDTO> ingredientDTOs = ingredients.stream()
                 .map(ingredient -> new IngredientDTO(
                         ingredient.getId(),

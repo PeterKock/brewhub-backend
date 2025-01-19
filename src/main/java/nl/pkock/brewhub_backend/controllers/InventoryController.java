@@ -106,9 +106,9 @@ public class InventoryController {
         if (search != null && !search.trim().isEmpty()) {
             ingredients = ingredientRepository.searchIngredients(retailerId, search.trim());
         } else if (category != null) {
-            ingredients = ingredientRepository.findByRetailerIdAndCategory(retailerId, category);
+            ingredients = ingredientRepository.findByRetailerIdAndCategoryAndActiveTrue(retailerId, category);
         } else {
-            ingredients = ingredientRepository.findByRetailerId(retailerId);
+            ingredients = ingredientRepository.findByRetailerIdAndActiveTrue(retailerId);
         }
 
         return ResponseEntity.ok(convertToDTOList(ingredients));
@@ -179,15 +179,19 @@ public class InventoryController {
             @PathVariable Long id) {
 
         Ingredient ingredient = getAndVerifyIngredient(authentication, id);
-        ingredientRepository.delete(ingredient);
+
+        // Instead of deleting, marking as inactive
+        ingredient.setActive(false);
+        ingredientRepository.save(ingredient);
+
         return ResponseEntity.ok().build();
     }
-
     @GetMapping("/export")
     public ResponseEntity<String> exportInventory(Authentication authentication) {
         try {
             Long retailerId = getRetailerId(authentication);
-            List<Ingredient> ingredients = ingredientRepository.findByRetailerId(retailerId);
+            // Update this line
+            List<Ingredient> ingredients = ingredientRepository.findByRetailerIdAndActiveTrue(retailerId);
 
             List<IngredientCsvDTO> csvDtos = ingredients.stream()
                     .map(ingredient -> {
