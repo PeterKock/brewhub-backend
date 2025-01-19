@@ -23,4 +23,11 @@ public interface IngredientRepository extends JpaRepository<Ingredient, Long> {
 
     @Query("SELECT i FROM Ingredient i WHERE i.retailer.id = ?1 AND i.active = true AND i.quantity <= i.lowStockThreshold")
     List<Ingredient> findLowStockIngredients(Long retailerId);
+
+    @Query("SELECT i FROM Ingredient i WHERE i.retailer.id = ?1 AND i.active = false AND " +
+            "(LOWER(i.name) LIKE LOWER(CONCAT('%', ?2, '%')) OR " +
+            "LOWER(i.category) LIKE LOWER(CONCAT('%', ?2, '%')))")
+    List<Ingredient> searchDeletedIngredients(Long retailerId, String searchTerm);
+
+    List<Ingredient> findByRetailerIdAndCategoryAndActiveFalse(Long retailerId, IngredientCategory category);
 }

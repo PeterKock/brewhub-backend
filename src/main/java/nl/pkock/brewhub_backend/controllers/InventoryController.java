@@ -231,9 +231,22 @@ public class InventoryController {
 
     @GetMapping("/deleted")
     @PreAuthorize("hasRole('RETAILER')")
-    public ResponseEntity<List<IngredientDTO>> getDeletedIngredients(Authentication authentication) {
+    public ResponseEntity<List<IngredientDTO>> getDeletedIngredients(
+            Authentication authentication,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) IngredientCategory category) {
+
         Long retailerId = getRetailerId(authentication);
-        List<Ingredient> deletedIngredients = ingredientRepository.findByRetailerIdAndActiveFalse(retailerId);
+        List<Ingredient> deletedIngredients;
+
+        if (search != null && !search.trim().isEmpty()) {
+            deletedIngredients = ingredientRepository.searchDeletedIngredients(retailerId, search.trim());
+        } else if (category != null) {
+            deletedIngredients = ingredientRepository.findByRetailerIdAndCategoryAndActiveFalse(retailerId, category);
+        } else {
+            deletedIngredients = ingredientRepository.findByRetailerIdAndActiveFalse(retailerId);
+        }
+
         return ResponseEntity.ok(convertToDTOList(deletedIngredients));
     }
 
