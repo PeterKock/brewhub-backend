@@ -85,11 +85,24 @@ public class AuthController {
         user.setLastName(signUpRequest.getLastName());
         user.setEmail(signUpRequest.getEmail());
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
-        user.setLocation(signUpRequest.getLocation()); // Set the location
+        user.setLocation(signUpRequest.getLocation());
 
-        UserRole role = signUpRequest.getRole() != null && signUpRequest.getRole().equalsIgnoreCase("RETAILER")
-                ? UserRole.RETAILER
-                : UserRole.USER;
+        // Modified role assignment
+        UserRole role;
+        if (signUpRequest.getRole() != null) {
+            switch (signUpRequest.getRole().toUpperCase()) {
+                case "RETAILER" -> {
+                    if (signUpRequest.getLocation() == null || signUpRequest.getLocation().trim().isEmpty()) {
+                        return ResponseEntity.badRequest().body("Location is required for retailers");
+                    }
+                    role = UserRole.RETAILER;
+                }
+                case "MODERATOR" -> role = UserRole.MODERATOR;
+                default -> role = UserRole.USER;
+            }
+        } else {
+            role = UserRole.USER;
+        }
         user.setRoles(Collections.singleton(role));
 
         User savedUser = userRepository.save(user);

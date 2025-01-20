@@ -25,7 +25,7 @@ public class AnswerService {
 
     @Transactional(readOnly = true)
     public List<AnswerDTO> getAnswersByQuestionId(Long questionId, Long currentUserId) {
-        return answerRepository.findByQuestionIdAndIsActiveTrue(questionId)
+        return answerRepository.findByQuestionIdAndActiveTrue(questionId)  // Changed from IsActiveTrue
                 .stream()
                 .map(answer -> mapToDTO(answer, currentUserId))
                 .collect(Collectors.toList());
@@ -90,7 +90,7 @@ public class AnswerService {
                 .orElseThrow(() -> new RuntimeException("Answer not found"));
 
         // Remove accepted status from any previously accepted answer
-        answerRepository.findByQuestionIdAndIsActiveTrue(questionId)
+        answerRepository.findByQuestionIdAndActiveTrue(questionId)
                 .stream()
                 .filter(Answer::isAccepted)
                 .forEach(a -> {

@@ -1,5 +1,6 @@
 package nl.pkock.brewhub_backend.dto;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -14,4 +15,9 @@ public class CreateReportRequest {
 
     private Long questionId;
     private Long answerId;
+
+    @AssertTrue(message = "Either questionId or answerId must be provided")
+    private boolean isValidReport() {
+        return (questionId != null) ^ (answerId != null);
+    }
 }

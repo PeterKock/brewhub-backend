@@ -1,4 +1,8 @@
 package nl.pkock.brewhub_backend.models;
 
-public class ReportStatus {
+public enum ReportStatus {
+    PENDING,
+    APPROVED,
+    REJECTED,
+    RESOLVED
 }

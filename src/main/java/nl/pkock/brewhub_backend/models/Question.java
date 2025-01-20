@@ -35,11 +35,11 @@ public class Question {
     @Column
     private LocalDateTime updatedAt;
 
-    @Column(nullable = false)
-    private boolean isActive = true;
+    @Column(name = "is_active", nullable = false)
+    private boolean active = true;
 
-    @Column(nullable = false)
-    private boolean isPinned = false;
+    @Column(name = "is_pinned", nullable = false)
+    private boolean pinned = false;
 
     @PrePersist
     protected void onCreate() {

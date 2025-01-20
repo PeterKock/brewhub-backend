@@ -23,9 +23,9 @@ public class QuestionService {
 
     @Transactional(readOnly = true)
     public List<QuestionDTO> getAllQuestions(Long currentUserId) {
-        return questionRepository.findByIsActiveTrueOrderByCreatedAtDesc()
+        return questionRepository.findByActiveTrueOrderByCreatedAtDesc()
                 .stream()
-                .map(question -> mapToDTO(question, currentUserId))
+                .map(question -> this.mapToDTO(question, currentUserId))
                 .collect(Collectors.toList());
     }
 
@@ -102,11 +102,11 @@ public class QuestionService {
     public List<QuestionDTO> searchQuestions(String searchTerm, Long currentUserId) {
         return questionRepository.search(searchTerm)
                 .stream()
-                .map(question -> mapToDTO(question, currentUserId))
+                .map(question -> this.mapToDTO(question, currentUserId))
                 .collect(Collectors.toList());
     }
 
-    private QuestionDTO mapToDTO(Question question, Long currentUserId) {
+    public QuestionDTO mapToDTO(Question question, Long currentUserId) {
         QuestionDTO dto = new QuestionDTO();
         dto.setId(question.getId());
         dto.setTitle(question.getTitle());

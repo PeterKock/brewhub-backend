@@ -22,6 +22,16 @@ public class ReportService {
 
     @Transactional
     public ReportDTO createReport(CreateReportRequest request, Long reporterId) {
+        // Check for existing reports
+        if (request.getQuestionId() != null &&
+                reportRepository.existsByReporterIdAndQuestionId(reporterId, request.getQuestionId())) {
+            throw new RuntimeException("You have already reported this question");
+        }
+        if (request.getAnswerId() != null &&
+                reportRepository.existsByReporterIdAndAnswerId(reporterId, request.getAnswerId())) {
+            throw new RuntimeException("You have already reported this answer");
+        }
+
         User reporter = userRepository.findById(reporterId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -53,12 +63,20 @@ public class ReportService {
                 .collect(Collectors.toList());
     }
 
+    private boolean isModeratorUser(Long userId) {
+        return userRepository.findById(userId)
+                .map(user -> user.getRoles().contains(UserRole.MODERATOR))
+                .orElse(false);
+    }
+
     @Transactional
     public ReportDTO updateReportStatus(Long reportId, ReportStatus newStatus, Long moderatorId) {
+        if (!isModeratorUser(moderatorId)) {
+            throw new RuntimeException("Only moderators can update report status");
+        }
+
         Report report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new RuntimeException("Report not found"));
-
-        // TODO: Check if user has moderator privileges
 
         report.setStatus(newStatus);
         if (newStatus != ReportStatus.PENDING) {

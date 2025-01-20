@@ -34,13 +34,13 @@ public class Answer {
     private LocalDateTime updatedAt;
 
     @Column(nullable = false)
-    private boolean isActive = true;
+    private boolean active = true;
 
     @Column(nullable = false)
-    private boolean isAccepted = false;
+    private boolean accepted = false;
 
     @Column(nullable = false)
-    private boolean isVerifiedAnswer = false;
+    private boolean verifiedAnswer = false;
 
     @PrePersist
     protected void onCreate() {
