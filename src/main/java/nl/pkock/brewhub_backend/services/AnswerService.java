@@ -3,6 +3,7 @@ package nl.pkock.brewhub_backend.services;
 import lombok.RequiredArgsConstructor;
 import nl.pkock.brewhub_backend.dto.AnswerDTO;
 import nl.pkock.brewhub_backend.dto.CreateAnswerRequest;
+import nl.pkock.brewhub_backend.dto.VoteDTO;
 import nl.pkock.brewhub_backend.models.*;
 import nl.pkock.brewhub_backend.repositories.AnswerRepository;
 import nl.pkock.brewhub_backend.repositories.QuestionRepository;
