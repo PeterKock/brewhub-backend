@@ -10,11 +10,3 @@ public class VoteDTO {
     private Long userId;
 }
 
-@Data
-public class VoteRequest {
-    @NotNull(message = "Vote type is required")
-    private VoteType type;
-
-    private Long questionId;
-    private Long answerId;
-}

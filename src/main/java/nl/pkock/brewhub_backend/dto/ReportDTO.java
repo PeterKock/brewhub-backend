@@ -3,6 +3,8 @@ package nl.pkock.brewhub_backend.dto;
 import lombok.Data;
 import nl.pkock.brewhub_backend.models.ReportStatus;
 
+import java.time.LocalDateTime;
+
 @Data
 public class ReportDTO {
     private Long id;
@@ -15,14 +17,3 @@ public class ReportDTO {
     private LocalDateTime resolvedAt;
 }
 
-@Data
-public class CreateReportRequest {
-    @NotBlank(message = "Reason is required")
-    private String reason;
-
-    @Size(max = 1000, message = "Description cannot exceed 1000 characters")
-    private String description;
-
-    private Long questionId;
-    private Long answerId;
-}
