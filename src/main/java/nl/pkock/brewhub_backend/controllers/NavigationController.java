@@ -41,9 +41,9 @@ public class NavigationController {
             menuItems.addAll(List.of(
                     new MenuItemDTO("Dashboard", "/user/dashboard"),
                     new MenuItemDTO("Orders", "/user/orders"),
-                    new MenuItemDTO("Community", "/user/community"),
-                    new MenuItemDTO("Recipes", "/user/recipes"),
-                    new MenuItemDTO("Guides", "/user/guides")
+                    new MenuItemDTO("Community", "/community"),
+                    new MenuItemDTO("Recipes", "/recipes"),
+                    new MenuItemDTO("Guides", "/guides")
             ));
         }
 
@@ -52,8 +52,8 @@ public class NavigationController {
             menuItems.addAll(List.of(
                     new MenuItemDTO("Dashboard", "/retailer/dashboard"),
                     new MenuItemDTO("Orders", "/retailer/orders"),
-                    new MenuItemDTO("Inventory", "/retailer/inventory"),
-                    new MenuItemDTO("Community", "/user/community")
+                    new MenuItemDTO("Inventory", "/inventory"),
+                    new MenuItemDTO("Community", "/community")
             ));
         }
 
