@@ -137,6 +137,9 @@ public class QuestionService {
     }
 
     private int calculateVoteCount(List<Vote> votes) {
+        if (votes == null) {
+            return 0;
+        }
         return (int) (votes.stream().filter(v -> v.getType() == VoteType.UPVOTE).count() -
                 votes.stream().filter(v -> v.getType() == VoteType.DOWNVOTE).count());
     }

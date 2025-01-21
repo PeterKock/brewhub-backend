@@ -57,6 +57,12 @@ public class NavigationController {
             ));
         }
 
+        if (roles.contains("ROLE_MODERATOR")) {
+            menuItems.add(
+                    new MenuItemDTO("Moderate", "/moderator/dashboard")
+            );
+        }
+
         System.out.println("Final menu items: " + menuItems);
         return ResponseEntity.ok(new NavigationDTO(menuItems));
     }

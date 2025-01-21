@@ -3,6 +3,7 @@ package nl.pkock.brewhub_backend.models;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -25,7 +26,7 @@ public class Answer {
     private Question question;
 
     @OneToMany(mappedBy = "answer", cascade = CascadeType.ALL)
-    private List<Vote> votes;
+    private List<Vote> votes = new ArrayList<>();
 
     @Column(nullable = false)
     private LocalDateTime createdAt;

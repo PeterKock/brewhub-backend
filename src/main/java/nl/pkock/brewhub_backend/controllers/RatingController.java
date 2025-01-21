@@ -14,6 +14,7 @@ import nl.pkock.brewhub_backend.security.UserPrincipal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -104,6 +105,7 @@ public class RatingController {
     }
 
     @GetMapping("/public/retailers/{retailerId}/ratings")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<RatingDTO>> getRetailerRatings(@PathVariable Long retailerId) {
         List<Rating> ratings = ratingRepository.findByRetailerId(retailerId);
         List<RatingDTO> ratingDTOs = ratings.stream()
