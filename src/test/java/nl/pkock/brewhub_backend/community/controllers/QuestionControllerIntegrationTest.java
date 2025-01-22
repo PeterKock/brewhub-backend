@@ -24,13 +24,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class AnswerControllerIntegrationTest {
+class QuestionControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     private static final long TEST_USER_ID = 1L;
-    private static final long TEST_ANSWER_ID = 1L;
     private static final long TEST_QUESTION_ID = 1L;
 
     @BeforeEach
@@ -50,9 +49,9 @@ class AnswerControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("getAnswers - successfully retrieve answers")
-    void getAnswers_Success() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/community/answers/question/" + TEST_QUESTION_ID)
+    @DisplayName("getQuestions - get all questions")
+    void getQuestions() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/community/questions")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
@@ -60,70 +59,81 @@ class AnswerControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("createAnswer - with valid input")
-    void createAnswer_Success() throws Exception {
-        String validContent = "This is a test answer that meets the minimum length requirement of 20 characters";
-        String answerRequest = """
-            {
-                "content": "%s",
-                "questionId": %d
-            }
-            """.formatted(validContent, TEST_QUESTION_ID);
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/community/answers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(answerRequest))
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").value(validContent));
-    }
-
-    @Test
-    @DisplayName("updateAnswer - with valid input")
-    void updateAnswer_Success() throws Exception {
-        String validContent = "This is an updated answer that meets the minimum length requirement";
-        String updateRequest = """
-            {
-                "content": "%s",
-                "questionId": %d
-            }
-            """.formatted(validContent, TEST_QUESTION_ID);
-
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/community/answers/" + TEST_ANSWER_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(updateRequest))
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").value(validContent));
-    }
-
-    @Test
-    @DisplayName("deleteAnswer - successful deletion")
-    void deleteAnswer_Success() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/community/answers/" + TEST_ANSWER_ID)
+    @DisplayName("getQuestionById - get specific question")
+    void getQuestionById() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/community/questions/" + TEST_QUESTION_ID)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk());
     }
 
     @Test
-    @DisplayName("acceptAnswer - successful acceptance")
-    void acceptAnswer_Success() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/community/answers/" + TEST_ANSWER_ID + "/accept")
-                        .param("questionId", String.valueOf(TEST_QUESTION_ID))
-                        .contentType(MediaType.APPLICATION_JSON))
+    @DisplayName("createQuestion - with valid input")
+    void createQuestion_whenLoggedIn() throws Exception {
+        String validContent = "This is a test question content that meets the minimum length requirement of 20 characters";
+        String questionRequest = """
+            {
+                "title": "Test Question Title",
+                "content": "%s"
+            }
+            """.formatted(validContent);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/community/questions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(questionRequest))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accepted").value(true));
+                .andExpect(jsonPath("$.title").value("Test Question Title"))
+                .andExpect(jsonPath("$.content").value(validContent));
     }
 
     @Test
-    @DisplayName("toggleVerifiedStatus - successful toggle")
-    void toggleVerifiedStatus_Success() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/community/answers/" + TEST_ANSWER_ID + "/verify")
+    @DisplayName("updateQuestion - with valid input")
+    void updateQuestion_whenLoggedIn() throws Exception {
+        String validContent = "This is an updated question content that meets the minimum length requirement";
+        String updateRequest = """
+            {
+                "title": "Updated Question Title",
+                "content": "%s"
+            }
+            """.formatted(validContent);
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/community/questions/" + TEST_QUESTION_ID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateRequest))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Updated Question Title"))
+                .andExpect(jsonPath("$.content").value(validContent));
+    }
+
+    @Test
+    @DisplayName("deleteQuestion - successful deletion")
+    void deleteQuestion_whenLoggedIn() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/community/questions/" + TEST_QUESTION_ID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("togglePin - successful pin toggle")
+    void togglePin_whenLoggedIn() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/community/questions/" + TEST_QUESTION_ID + "/pin")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("searchQuestions - with search term")
+    void searchQuestions() throws Exception {
+        String searchTerm = "test";
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/community/questions/search")
+                        .param("query", searchTerm)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.verified").exists());
+                .andExpect(jsonPath("$").isArray());
     }
 }
