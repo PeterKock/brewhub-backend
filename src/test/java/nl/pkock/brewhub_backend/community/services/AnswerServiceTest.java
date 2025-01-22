@@ -235,6 +235,7 @@ class AnswerServiceTest {
         when(questionRepository.findById(1L)).thenReturn(Optional.of(testQuestion));
         when(answerRepository.findById(1L)).thenReturn(Optional.of(testAnswer));
         when(answerRepository.findByQuestionIdAndActiveTrue(1L)).thenReturn(answers);
+        when(answerRepository.save(any(Answer.class))).thenReturn(testAnswer);
 
         // Act
         AnswerDTO result = answerService.acceptAnswer(1L, 1L, 1L);
