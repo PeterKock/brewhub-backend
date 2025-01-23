@@ -6,7 +6,6 @@ import lombok.Data;
 import nl.pkock.brewhub_backend.rating.model.Rating;
 
 import java.util.List;
-
 import java.util.Set;
 
 @Entity
@@ -14,7 +13,8 @@ import java.util.Set;
 @Data
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_sequence")
+    @SequenceGenerator(name = "user_sequence", sequenceName = "user_sequence", allocationSize = 1, initialValue = 5)
     private Long id;
 
     @Column(unique = true, nullable = false)
@@ -42,6 +42,11 @@ public class User {
     private List<Rating> receivedRatings;
 
     @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "users_roles",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
+    @Column(name = "roles")
     @Enumerated(EnumType.STRING)
     private Set<UserRole> roles;
 }
