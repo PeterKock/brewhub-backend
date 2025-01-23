@@ -1,4 +1,4 @@
-package nl.pkock.brewhub_backend.auth.dto;
+package nl.pkock.brewhub_backend.navigation.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

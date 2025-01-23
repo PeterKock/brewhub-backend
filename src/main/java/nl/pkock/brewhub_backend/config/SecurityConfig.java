@@ -1,4 +1,4 @@
-package nl.pkock.brewhub_backend;
+package nl.pkock.brewhub_backend.config;
 
 import nl.pkock.brewhub_backend.auth.security.CustomUserDetailsService;
 import nl.pkock.brewhub_backend.auth.security.JwtAuthenticationFilter;
