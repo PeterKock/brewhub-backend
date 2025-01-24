@@ -119,8 +119,60 @@ CREATE TABLE IF NOT EXISTS ratings (
                                        FOREIGN KEY (order_id) REFERENCES orders(id)
 );
 
+CREATE TABLE IF NOT EXISTS recipes (
+                                       id BIGSERIAL PRIMARY KEY,
+                                       title VARCHAR(255) NOT NULL,
+                                       description TEXT NOT NULL,
+                                       difficulty VARCHAR(50) NOT NULL,
+                                       time_in_weeks INTEGER NOT NULL,
+                                       type VARCHAR(50) NOT NULL,
+                                       abv VARCHAR(10) NOT NULL,
+                                       ibu VARCHAR(10) NOT NULL,
+                                       created_by BIGINT NOT NULL,
+                                       last_modified_by BIGINT NOT NULL,
+                                       FOREIGN KEY (created_by) REFERENCES users(id),
+                                       FOREIGN KEY (last_modified_by) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS recipe_ingredients (
+                                                  recipe_id BIGINT NOT NULL,
+                                                  ingredient VARCHAR(255) NOT NULL,
+                                                  FOREIGN KEY (recipe_id) REFERENCES recipes(id)
+);
+
+CREATE TABLE IF NOT EXISTS recipe_instructions (
+                                                   recipe_id BIGINT NOT NULL,
+                                                   instruction TEXT NOT NULL,
+                                                   FOREIGN KEY (recipe_id) REFERENCES recipes(id)
+);
+
+CREATE TABLE IF NOT EXISTS guides (
+                                      id BIGSERIAL PRIMARY KEY,
+                                      title VARCHAR(255) NOT NULL,
+                                      description TEXT NOT NULL,
+                                      category VARCHAR(50) NOT NULL,
+                                      time_to_read INTEGER NOT NULL,
+                                      created_by BIGINT NOT NULL,
+                                      last_modified_by BIGINT NOT NULL,
+                                      FOREIGN KEY (created_by) REFERENCES users(id),
+                                      FOREIGN KEY (last_modified_by) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS guide_sections (
+                                              guide_id BIGINT NOT NULL,
+                                              title VARCHAR(255) NOT NULL,
+                                              content TEXT NOT NULL,
+                                              FOREIGN KEY (guide_id) REFERENCES guides(id)
+);
+
+CREATE TABLE IF NOT EXISTS guide_tips (
+                                          guide_id BIGINT NOT NULL,
+                                          tip TEXT NOT NULL,
+                                          FOREIGN KEY (guide_id) REFERENCES guides(id)
+);
+
 -- Delete existing data
-TRUNCATE TABLE users_roles, votes, reports, answers, questions, ratings, order_items, orders, ingredients, users CASCADE;
+TRUNCATE TABLE users_roles, votes, reports, answers, questions, ratings, order_items, orders, ingredients, users, guide_tips, guide_sections, guides, recipe_instructions, recipe_ingredients, recipes CASCADE;
 
 -- Insert initial users without explicit IDs
 INSERT INTO users (email, password, first_name, last_name, location, average_rating, total_ratings)
@@ -242,3 +294,133 @@ VALUES
      (SELECT id FROM users WHERE email = 'craftbeer@example.com'),
      (SELECT id FROM users WHERE email = 'brewery@example.com'),
      (SELECT id FROM orders WHERE notes IS NULL));
+
+-- Insert recipes
+INSERT INTO recipes (title, description, difficulty, time_in_weeks, type, abv, ibu, created_by, last_modified_by)
+VALUES
+    ('Bock', 'A strong, dark German beer', 'Intermediate', 8, 'Lager', '6.5%', '25',
+     (SELECT id FROM users WHERE email = 'beermod@example.com'),
+     (SELECT id FROM users WHERE email = 'beermod@example.com')),
+    ('Pilsener', 'Fresh malt, fresh hops, correct population of yeast', 'Beginner', 6, 'Lager', '4.8%', '35',
+     (SELECT id FROM users WHERE email = 'beermod@example.com'),
+     (SELECT id FROM users WHERE email = 'beermod@example.com')),
+    ('Weizen', 'A wheat beer of South German or Bavarian origin', 'Beginner', 3, 'Ale', '5.2%', '15',
+     (SELECT id FROM users WHERE email = 'beermod@example.com'),
+     (SELECT id FROM users WHERE email = 'beermod@example.com')),
+    ('Triple', 'A strong malty, hop bitter taste heavy top-fermented beer', 'Advanced', 10, 'Ale', '9.5%', '35',
+     (SELECT id FROM users WHERE email = 'beermod@example.com'),
+     (SELECT id FROM users WHERE email = 'beermod@example.com')),
+    ('IPA', 'A perfectly balanced India Pale Ale with citrus notes', 'Intermediate', 4, 'Ale', '6.8%', '65',
+     (SELECT id FROM users WHERE email = 'beermod@example.com'),
+     (SELECT id FROM users WHERE email = 'beermod@example.com'));
+
+-- Insert recipe ingredients
+INSERT INTO recipe_ingredients (recipe_id, ingredient)
+SELECT id, unnest(ARRAY[
+    '10 lbs Munich malt',
+    '2 lbs Vienna malt',
+    '0.5 lbs Caramunich malt',
+    '2 oz Hallertauer hops (bittering)',
+    '1 oz Tettnanger hops (aroma)',
+    'German lager yeast'
+    ])
+FROM recipes WHERE title = 'Bock';
+
+INSERT INTO recipe_ingredients (recipe_id, ingredient)
+SELECT id, unnest(ARRAY[
+    '8 lbs Pilsner malt',
+    '0.5 lbs Carafoam',
+    '2.5 oz Saaz hops',
+    'Czech Pilsner yeast'
+    ])
+FROM recipes WHERE title = 'Pilsener';
+
+INSERT INTO recipe_ingredients (recipe_id, ingredient)
+SELECT id, unnest(ARRAY[
+    '5 lbs Wheat malt',
+    '4 lbs Pilsner malt',
+    '1 oz Hallertauer hops',
+    'Weihenstephan yeast'
+    ])
+FROM recipes WHERE title = 'Weizen';
+
+-- Insert recipe instructions
+INSERT INTO recipe_instructions (recipe_id, instruction)
+SELECT id, unnest(ARRAY[
+    'Mash grains at 152°F for 60 minutes',
+    'Sparge and collect wort',
+    'Boil for 90 minutes, adding hops per schedule',
+    'Ferment at 50°F for 4 weeks',
+    'Lager for 4 weeks at 35°F'
+    ])
+FROM recipes WHERE title = 'Bock';
+
+INSERT INTO recipe_instructions (recipe_id, instruction)
+SELECT id, unnest(ARRAY[
+    'Mash at 148°F for 90 minutes',
+    'Sparge with 170°F water',
+    'Boil for 90 minutes',
+    'Ferment at 50°F for 2 weeks',
+    'Lager for 4 weeks at 35°F'
+    ])
+FROM recipes WHERE title = 'Pilsener';
+
+INSERT INTO recipe_instructions (recipe_id, instruction)
+SELECT id, unnest(ARRAY[
+    'Mash at 152°F for 60 minutes',
+    'Sparge with 170°F water',
+    'Boil for 60 minutes',
+    'Ferment at 68°F for 2 weeks',
+    'Bottle condition for 1 week'
+    ])
+FROM recipes WHERE title = 'Weizen';
+
+-- Insert guides
+INSERT INTO guides (title, description, category, time_to_read, created_by, last_modified_by)
+VALUES
+    ('Getting Started with Home Brewing', 'Everything you need to know to start your brewing journey.',
+     'getting-started', 15,
+     (SELECT id FROM users WHERE email = 'beermod@example.com'),
+     (SELECT id FROM users WHERE email = 'beermod@example.com')),
+
+    ('Essential Brewing Equipment Guide', 'A comprehensive guide to all the equipment you will need.',
+     'equipment', 10,
+     (SELECT id FROM users WHERE email = 'beermod@example.com'),
+     (SELECT id FROM users WHERE email = 'beermod@example.com')),
+
+    ('Understanding Malt Types', 'Deep dive into different malt varieties, their characteristics, and how they affect your beer flavor and color.',
+     'ingredients', 12,
+     (SELECT id FROM users WHERE email = 'beermod@example.com'),
+     (SELECT id FROM users WHERE email = 'beermod@example.com'));
+
+-- Insert guide sections
+INSERT INTO guide_sections (guide_id, title, content)
+SELECT id, 'Basic Brewing Concepts', 'Understanding the fundamentals of brewing, including mashing, boiling, fermentation, and conditioning.'
+FROM guides WHERE title = 'Getting Started with Home Brewing';
+
+INSERT INTO guide_sections (guide_id, title, content)
+SELECT id, 'Essential Equipment', 'Overview of must-have equipment for your first brew day.'
+FROM guides WHERE title = 'Getting Started with Home Brewing';
+
+INSERT INTO guide_sections (guide_id, title, content)
+SELECT id, 'Basic Equipment List', 'Kettles, fermenters, airlocks, and other fundamental tools.'
+FROM guides WHERE title = 'Essential Brewing Equipment Guide';
+
+-- Insert guide tips
+INSERT INTO guide_tips (guide_id, tip)
+SELECT id, unnest(ARRAY[
+    'Start with simple recipes',
+    'Focus on sanitization',
+    'Keep detailed records',
+    'Join a local brewing community'
+    ])
+FROM guides WHERE title = 'Getting Started with Home Brewing';
+
+INSERT INTO guide_tips (guide_id, tip)
+SELECT id, unnest(ARRAY[
+    'Invest in quality basic equipment',
+    'Prioritize cleaning supplies',
+    'Consider future upgrades',
+    'Buy bigger than you think you need'
+    ])
+FROM guides WHERE title = 'Essential Brewing Equipment Guide';
