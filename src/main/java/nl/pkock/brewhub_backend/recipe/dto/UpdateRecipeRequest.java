@@ -4,8 +4,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class RecipeDTO {
-    private Long id;
+public class UpdateRecipeRequest implements RecipeRequest {
     private String title;
     private String description;
     private String difficulty;
@@ -16,4 +15,3 @@ public class RecipeDTO {
     private List<String> ingredients;
     private List<String> instructions;
 }
-
