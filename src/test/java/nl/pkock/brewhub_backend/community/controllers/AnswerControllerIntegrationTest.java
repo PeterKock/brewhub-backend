@@ -98,7 +98,7 @@ class AnswerControllerIntegrationTest {
         String validContent = "This is a test answer that meets the minimum length requirement of 20 characters";
         String answerRequest = """
         {
-            "content": "%s", 
+            "content": "%s",
             "questionId": %d
         }
         """.formatted(validContent, TEST_QUESTION_ID);
@@ -128,13 +128,6 @@ class AnswerControllerIntegrationTest {
     }
 
     @Test
-    void deleteAnswer_Success() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/community/answers/" + TEST_ANSWER_ID)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-    }
-
-    @Test
     void acceptAnswer_Success() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.post("/api/community/answers/" + TEST_ANSWER_ID + "/accept")
                         .param("questionId", String.valueOf(TEST_QUESTION_ID))
@@ -149,5 +142,12 @@ class AnswerControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.verified").exists());
+    }
+
+    @Test
+    void deleteAnswer_Success() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/community/answers/" + TEST_ANSWER_ID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
     }
 }

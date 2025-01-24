@@ -122,76 +122,123 @@ CREATE TABLE IF NOT EXISTS ratings (
 -- Delete existing data
 TRUNCATE TABLE users_roles, votes, reports, answers, questions, ratings, order_items, orders, ingredients, users CASCADE;
 
--- Insert users
-INSERT INTO users (id, email, password, first_name, last_name, location, average_rating, total_ratings)
+-- Insert initial users without explicit IDs
+INSERT INTO users (email, password, first_name, last_name, location, average_rating, total_ratings)
 VALUES
-    (1, 'beeruser@example.com', '$2a$12$XfJB9oY8E.RK2zPL0PQ57ej48qogZba0qd4o/n/.WaGxejm15zkLG', 'Bob', 'Beer', 'Amsterdam', 0.0, 0),
-    (2, 'brewery@example.com', '$2a$12$XfJB9oY8E.RK2zPL0PQ57ej48qogZba0qd4o/n/.WaGxejm15zkLG', 'Brewer', 'Smith', 'Rotterdam', 4.5, 10),
-    (3, 'beermod@example.com', '$2a$12$XfJB9oY8E.RK2zPL0PQ57ej48qogZba0qd4o/n/.WaGxejm15zkLG', 'Mike', 'Moderator', 'Utrecht', 0.0, 0),
-    (4, 'craftbeer@example.com', '$2a$12$XfJB9oY8E.RK2zPL0PQ57ej48qogZba0qd4o/n/.WaGxejm15zkLG', 'Craft', 'Enthusiast', 'The Hague', 0.0, 0);
+    ('beeruser@example.com', '$2a$12$XfJB9oY8E.RK2zPL0PQ57ej48qogZba0qd4o/n/.WaGxejm15zkLG', 'Bob', 'Beer', 'Amsterdam', 0.0, 0),
+    ('brewery@example.com', '$2a$12$XfJB9oY8E.RK2zPL0PQ57ej48qogZba0qd4o/n/.WaGxejm15zkLG', 'Brewer', 'Smith', 'Rotterdam', 4.5, 10),
+    ('beermod@example.com', '$2a$12$XfJB9oY8E.RK2zPL0PQ57ej48qogZba0qd4o/n/.WaGxejm15zkLG', 'Mike', 'Moderator', 'Utrecht', 0.0, 0),
+    ('craftbeer@example.com', '$2a$12$XfJB9oY8E.RK2zPL0PQ57ej48qogZba0qd4o/n/.WaGxejm15zkLG', 'Craft', 'Enthusiast', 'The Hague', 0.0, 0);
 
--- Insert user roles
+-- Assign user roles using subqueries
 INSERT INTO users_roles (user_id, roles)
-VALUES
-    (1, 'USER'),
-    (2, 'RETAILER'),
-    (3, 'MODERATOR'),
-    (4, 'USER');
+SELECT id, 'USER' FROM users WHERE email = 'beeruser@example.com';
 
--- Insert ingredients
-INSERT INTO ingredients (id, name, category, quantity, price, low_stock_threshold, active, retailer_id, expiry_date, unit)
-VALUES
-    (1, 'Pilsner Malt', 'GRAINS', 100, 2.99, 20, true, 2, CURRENT_DATE + INTERVAL '6 months', 'KG'),
-    (2, 'Cascade Hops', 'HOPS', 80, 4.99, 15, true, 2, CURRENT_DATE + INTERVAL '6 months', 'G'),
-    (3, 'Belgian Yeast', 'YEAST', 50, 3.99, 10, true, 2, CURRENT_DATE + INTERVAL '3 months', 'G'),
-    (4, 'Citra Hops', 'HOPS', 5, 5.99, 10, true, 2, CURRENT_DATE + INTERVAL '6 months', 'G'),
-    (5, 'Munich Malt', 'GRAINS', 40, 3.49, 8, true, 2, CURRENT_DATE + INTERVAL '6 months', 'KG'),
-    (6, 'Wheat Malt', 'GRAINS', 75, 2.99, 15, true, 2, CURRENT_DATE + INTERVAL '6 months', 'KG'),
-    (7, 'Saaz Hops', 'HOPS', 30, 4.49, 8, true, 2, CURRENT_DATE + INTERVAL '6 months', 'G'),
-    (8, 'Lager Yeast', 'YEAST', 25, 3.99, 5, true, 2, CURRENT_DATE + INTERVAL '3 months', 'G');
+INSERT INTO users_roles (user_id, roles)
+SELECT id, 'RETAILER' FROM users WHERE email = 'brewery@example.com';
 
--- Insert questions
-INSERT INTO questions (id, title, content, created_at, updated_at, is_active, is_pinned, author_id)
-VALUES
-    (1, 'Best hops for IPA?', 'I''m brewing my first IPA and wondering which hop combinations work best. Any suggestions?', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, false, 1),
-    (2, 'Proper fermentation temperature?', 'What''s the ideal temperature range for fermenting a Belgian-style ale?', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, false, 4),
-    (3, 'Cloudy beer problem', 'My latest batch came out really cloudy. Using wheat malt and Belgian yeast. Normal?', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, false, 1);
+INSERT INTO users_roles (user_id, roles)
+SELECT id, 'MODERATOR' FROM users WHERE email = 'beermod@example.com';
 
--- Insert answers
-INSERT INTO answers (id, content, created_at, updated_at, active, accepted, verified_answer, author_id, question_id)
-VALUES
-    (1, 'For an IPA, I highly recommend a combination of Cascade for bittering and Citra for aroma. They create that perfect citrusy profile that''s popular in modern IPAs.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, true, true, 2, 1),
-    (2, '18°C is actually perfect for Belgian ales! They typically ferment best between 17-21°C (63-70°F).', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, false, true, 3, 2),
-    (3, 'With wheat malt and Belgian yeast, cloudiness is completely normal! Belgian witbiers are traditionally cloudy.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, false, false, 2, 3);
+INSERT INTO users_roles (user_id, roles)
+SELECT id, 'USER' FROM users WHERE email = 'craftbeer@example.com';
 
--- Insert votes
-INSERT INTO votes (id, type, created_at, user_id, question_id, answer_id)
-VALUES
-    (1, 'UPVOTE', CURRENT_TIMESTAMP, 1, 1, NULL),
-    (2, 'UPVOTE', CURRENT_TIMESTAMP, 4, 1, NULL),
-    (3, 'UPVOTE', CURRENT_TIMESTAMP, 1, NULL, 1),
-    (4, 'UPVOTE', CURRENT_TIMESTAMP, 4, NULL, 2);
+-- Insert ingredients using array unnest for bulk insert
+INSERT INTO ingredients (name, category, quantity, price, low_stock_threshold, active, retailer_id, expiry_date, unit)
+SELECT unnest(ARRAY['Pilsner Malt', 'Cascade Hops', 'Belgian Yeast', 'Citra Hops', 'Munich Malt', 'Wheat Malt', 'Saaz Hops', 'Lager Yeast']),
+       unnest(ARRAY['GRAINS', 'HOPS', 'YEAST', 'HOPS', 'GRAINS', 'GRAINS', 'HOPS', 'YEAST']),
+       unnest(ARRAY[100, 80, 50, 5, 40, 75, 30, 25]::decimal[]),
+       unnest(ARRAY[2.99, 4.99, 3.99, 5.99, 3.49, 2.99, 4.49, 3.99]::decimal[]),
+       unnest(ARRAY[20, 15, 10, 10, 8, 15, 8, 5]::decimal[]),
+       true,
+       (SELECT id FROM users WHERE email = 'brewery@example.com'),
+       CURRENT_DATE + INTERVAL '6 months',
+       unnest(ARRAY['KG', 'G', 'G', 'G', 'KG', 'KG', 'G', 'G']);
 
--- Insert reports
-INSERT INTO reports (id, reason, status, created_at, reporter_id, question_id, answer_id)
+-- Insert community questions
+INSERT INTO questions (title, content, created_at, updated_at, is_active, is_pinned, author_id)
 VALUES
-    (1, 'Possible spam - promoting specific brand', 'PENDING', CURRENT_TIMESTAMP, 4, NULL, 1);
+    ('Best hops for IPA?',
+     'I''m brewing my first IPA and wondering which hop combinations work best. Any suggestions?',
+     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, false,
+     (SELECT id FROM users WHERE email = 'beeruser@example.com')),
+    ('Proper fermentation temperature?',
+     'What''s the ideal temperature range for fermenting a Belgian-style ale?',
+     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, false,
+     (SELECT id FROM users WHERE email = 'craftbeer@example.com')),
+    ('Cloudy beer problem',
+     'My latest batch came out really cloudy. Using wheat malt and Belgian yeast. Normal?',
+     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, false,
+     (SELECT id FROM users WHERE email = 'beeruser@example.com'));
+
+-- Insert answers to community questions
+INSERT INTO answers (content, created_at, updated_at, active, accepted, verified_answer, author_id, question_id)
+VALUES
+    ('For an IPA, I highly recommend a combination of Cascade for bittering and Citra for aroma. They create that perfect citrusy profile that''s popular in modern IPAs.',
+     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, true, true,
+     (SELECT id FROM users WHERE email = 'brewery@example.com'),
+     (SELECT id FROM questions WHERE title = 'Best hops for IPA?')),
+    ('18°C is actually perfect for Belgian ales! They typically ferment best between 17-21°C (63-70°F).',
+     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, false, true,
+     (SELECT id FROM users WHERE email = 'beermod@example.com'),
+     (SELECT id FROM questions WHERE title = 'Proper fermentation temperature?')),
+    ('With wheat malt and Belgian yeast, cloudiness is completely normal! Belgian witbiers are traditionally cloudy.',
+     CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, true, false, false,
+     (SELECT id FROM users WHERE email = 'brewery@example.com'),
+     (SELECT id FROM questions WHERE title = 'Cloudy beer problem'));
+
+-- Insert votes on questions and answers
+INSERT INTO votes (type, created_at, user_id, question_id)
+SELECT 'UPVOTE', CURRENT_TIMESTAMP, id,
+       (SELECT id FROM questions WHERE title = 'Best hops for IPA?')
+FROM users WHERE email IN ('beeruser@example.com', 'craftbeer@example.com');
+
+INSERT INTO votes (type, created_at, user_id, answer_id)
+VALUES
+    ('UPVOTE', CURRENT_TIMESTAMP,
+     (SELECT id FROM users WHERE email = 'beeruser@example.com'),
+     (SELECT id FROM answers WHERE content LIKE '%Cascade for bittering%')),
+    ('UPVOTE', CURRENT_TIMESTAMP,
+     (SELECT id FROM users WHERE email = 'craftbeer@example.com'),
+     (SELECT id FROM answers WHERE content LIKE '%18°C is actually perfect%'));
+
+-- Insert content reports
+INSERT INTO reports (reason, status, created_at, reporter_id, answer_id)
+VALUES ('Possible spam - promoting specific brand', 'PENDING', CURRENT_TIMESTAMP,
+        (SELECT id FROM users WHERE email = 'craftbeer@example.com'),
+        (SELECT id FROM answers WHERE content LIKE '%Cascade for bittering%'));
 
 -- Insert orders
-INSERT INTO orders (id, status, total_price, order_date, notes, customer_id, retailer_id)
+INSERT INTO orders (status, total_price, order_date, notes, customer_id, retailer_id)
 VALUES
-    (1, 'DELIVERED', 45.97, CURRENT_TIMESTAMP, 'First order', 1, 2),
-    (2, 'PENDING', 23.98, CURRENT_TIMESTAMP, NULL, 4, 2);
+    ('DELIVERED', 45.97, CURRENT_TIMESTAMP, 'First order',
+     (SELECT id FROM users WHERE email = 'beeruser@example.com'),
+     (SELECT id FROM users WHERE email = 'brewery@example.com')),
+    ('PENDING', 23.98, CURRENT_TIMESTAMP, NULL,
+     (SELECT id FROM users WHERE email = 'craftbeer@example.com'),
+     (SELECT id FROM users WHERE email = 'brewery@example.com'));
 
--- Create orders
-INSERT INTO order_items (id, order_id, ingredient_id, quantity, price_per_unit, total_price)
+-- Insert order items
+INSERT INTO order_items (order_id, ingredient_id, quantity, price_per_unit, total_price)
 VALUES
-    (1, 1, 1, 10.0, 2.99, 29.90),
-    (2, 1, 2, 5.0, 4.99, 24.95),
-    (3, 2, 3, 6.0, 3.99, 23.94);
+    ((SELECT id FROM orders WHERE notes = 'First order'),
+     (SELECT id FROM ingredients WHERE name = 'Pilsner Malt'),
+     10.0, 2.99, 29.90),
+    ((SELECT id FROM orders WHERE notes = 'First order'),
+     (SELECT id FROM ingredients WHERE name = 'Cascade Hops'),
+     5.0, 4.99, 24.95),
+    ((SELECT id FROM orders WHERE notes IS NULL),
+     (SELECT id FROM ingredients WHERE name = 'Belgian Yeast'),
+     6.0, 3.99, 23.94);
 
--- Insert ratings
-INSERT INTO ratings (id, score, comment, created_at, customer_id, retailer_id, order_id)
+-- Insert ratings for orders and retailers
+INSERT INTO ratings (score, comment, created_at, customer_id, retailer_id, order_id)
 VALUES
-    (1, 5, 'Great quality malt and super fresh hops!', CURRENT_TIMESTAMP, 1, 2, 1),
-    (2, 5, 'The Belgian yeast worked perfectly for my witbier!', CURRENT_TIMESTAMP, 4, 2, 2);
+    (5, 'Great quality malt and super fresh hops!', CURRENT_TIMESTAMP,
+     (SELECT id FROM users WHERE email = 'beeruser@example.com'),
+     (SELECT id FROM users WHERE email = 'brewery@example.com'),
+     (SELECT id FROM orders WHERE notes = 'First order')),
+    (5, 'The Belgian yeast worked perfectly for my witbier!', CURRENT_TIMESTAMP,
+     (SELECT id FROM users WHERE email = 'craftbeer@example.com'),
+     (SELECT id FROM users WHERE email = 'brewery@example.com'),
+     (SELECT id FROM orders WHERE notes IS NULL));
