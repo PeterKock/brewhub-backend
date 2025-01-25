@@ -55,13 +55,17 @@ public class NavigationService {
                 new MenuItemDTO("Dashboard", "/retailer/dashboard"),
                 new MenuItemDTO("Orders", "/retailer/orders"),
                 new MenuItemDTO("Inventory", "/inventory"),
-                new MenuItemDTO("Community", "/community")
+                new MenuItemDTO("Community", "/community"),
+                new MenuItemDTO("Recipes", "/recipes"),
+                new MenuItemDTO("Guides", "/guides")
         );
     }
 
     private List<MenuItemDTO> getModeratorMenuItems() {
         return List.of(
-                new MenuItemDTO("Dashboard", "/moderator/dashboard")
+                new MenuItemDTO("Dashboard", "/moderator/dashboard"),
+                new MenuItemDTO("Recipes", "/recipes"),
+                new MenuItemDTO("Guides", "/guides")
         );
     }
 }

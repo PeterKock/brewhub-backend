@@ -9,10 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.persistence.EntityNotFoundException;
-import java.util.stream.Collectors;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class GuideService {
     private final GuideRepository guideRepository;
 
@@ -21,30 +23,37 @@ public class GuideService {
         this.guideRepository = guideRepository;
     }
 
-    public List<Guide> getAllGuides() {
-        return guideRepository.findAll();
+    public List<GuideDTO> getAllGuides() {
+        List<Guide> guides = guideRepository.findAll();
+        return guides.stream()
+                .map(this::mapToDTO)
+                .toList();
     }
 
-    public Guide getGuideById(Long id) {
-        return guideRepository.findById(id)
+    public GuideDTO getGuideById(Long id) {
+        Guide guide = guideRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Guide not found with id: " + id));
+        return mapToDTO(guide);
     }
 
     @Transactional
-    public Guide createGuide(CreateGuideRequest request, UserPrincipal currentUser) {
+    public GuideDTO createGuide(CreateGuideRequest request, UserPrincipal currentUser) {
         Guide guide = new Guide();
         setGuideProperties(guide, request);
         guide.setCreatedBy(currentUser.getId());
         guide.setLastModifiedBy(currentUser.getId());
-        return guideRepository.save(guide);
+        Guide savedGuide = guideRepository.save(guide);
+        return mapToDTO(savedGuide);
     }
 
     @Transactional
-    public Guide updateGuide(Long id, UpdateGuideRequest request, UserPrincipal currentUser) {
-        Guide guide = getGuideById(id);
+    public GuideDTO updateGuide(Long id, UpdateGuideRequest request, UserPrincipal currentUser) {
+        Guide guide = guideRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Guide not found with id: " + id));
         setGuideProperties(guide, request);
         guide.setLastModifiedBy(currentUser.getId());
-        return guideRepository.save(guide);
+        Guide updatedGuide = guideRepository.save(guide);
+        return mapToDTO(updatedGuide);
     }
 
     private void setGuideProperties(Guide guide, GuideRequest request) {
@@ -52,28 +61,58 @@ public class GuideService {
         guide.setDescription(request.getDescription());
         guide.setCategory(request.getCategory());
         guide.setTimeToRead(request.getTimeToRead());
-        guide.setSections(request.getSections().stream()
+
+        List<Section> sections = request.getSections().stream()
                 .map(dto -> {
                     Section section = new Section();
                     section.setTitle(dto.getTitle());
                     section.setContent(dto.getContent());
                     return section;
                 })
-                .collect(Collectors.toList()));
-        guide.setTips(request.getTips());
+                .toList();
+        guide.setSections(new ArrayList<>(sections));
+        guide.setTips(new ArrayList<>(request.getTips()));
     }
 
     @Transactional
     public void deleteGuide(Long id) {
-        Guide guide = getGuideById(id);
+        Guide guide = guideRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Guide not found with id: " + id));
         guideRepository.delete(guide);
     }
 
-    public List<Guide> searchGuides(String searchTerm) {
-        return guideRepository.findByTitleContainingIgnoreCase(searchTerm);
+    public List<GuideDTO> searchGuides(String searchTerm) {
+        List<Guide> guides = guideRepository.findByTitleContainingIgnoreCase(searchTerm);
+        return guides.stream()
+                .map(this::mapToDTO)
+                .toList();
     }
 
-    public List<Guide> getGuidesByCategory(String category) {
-        return guideRepository.findByCategory(category);
+    public List<GuideDTO> getGuidesByCategory(String category) {
+        List<Guide> guides = guideRepository.findByCategory(category);
+        return guides.stream()
+                .map(this::mapToDTO)
+                .toList();
+    }
+
+    private GuideDTO mapToDTO(Guide guide) {
+        GuideDTO dto = new GuideDTO();
+        dto.setId(guide.getId());
+        dto.setTitle(guide.getTitle());
+        dto.setDescription(guide.getDescription());
+        dto.setCategory(guide.getCategory());
+        dto.setTimeToRead(guide.getTimeToRead());
+
+        dto.setSections(guide.getSections().stream()
+                .map(section -> {
+                    SectionDTO sectionDTO = new SectionDTO();
+                    sectionDTO.setTitle(section.getTitle());
+                    sectionDTO.setContent(section.getContent());
+                    return sectionDTO;
+                })
+                .toList());
+
+        dto.setTips(new ArrayList<>(guide.getTips()));
+        return dto;
     }
 }

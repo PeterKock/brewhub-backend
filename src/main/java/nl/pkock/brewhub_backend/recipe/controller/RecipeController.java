@@ -1,9 +1,7 @@
 package nl.pkock.brewhub_backend.recipe.controller;
 
-import nl.pkock.brewhub_backend.recipe.models.Recipe;
+import nl.pkock.brewhub_backend.recipe.dto.*;
 import nl.pkock.brewhub_backend.recipe.service.RecipeService;
-import nl.pkock.brewhub_backend.recipe.dto.CreateRecipeRequest;
-import nl.pkock.brewhub_backend.recipe.dto.UpdateRecipeRequest;
 import nl.pkock.brewhub_backend.auth.security.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,18 +24,18 @@ public class RecipeController {
     }
 
     @GetMapping
-    public List<Recipe> getAllRecipes() {
+    public List<RecipeDTO> getAllRecipes() {
         return recipeService.getAllRecipes();
     }
 
     @GetMapping("/{id}")
-    public Recipe getRecipeById(@PathVariable Long id) {
+    public RecipeDTO getRecipeById(@PathVariable Long id) {
         return recipeService.getRecipeById(id);
     }
 
     @PostMapping
     @PreAuthorize("hasRole('MODERATOR')")
-    public Recipe createRecipe(
+    public RecipeDTO createRecipe(
             @Valid @RequestBody CreateRecipeRequest request,
             Authentication authentication
     ) {
@@ -47,7 +45,7 @@ public class RecipeController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MODERATOR')")
-    public Recipe updateRecipe(
+    public RecipeDTO updateRecipe(
             @PathVariable Long id,
             @Valid @RequestBody UpdateRecipeRequest request,
             Authentication authentication
@@ -64,17 +62,17 @@ public class RecipeController {
     }
 
     @GetMapping("/search")
-    public List<Recipe> searchRecipes(@RequestParam String term) {
+    public List<RecipeDTO> searchRecipes(@RequestParam String term) {
         return recipeService.searchRecipes(term);
     }
 
     @GetMapping("/difficulty/{difficulty}")
-    public List<Recipe> getRecipesByDifficulty(@PathVariable String difficulty) {
+    public List<RecipeDTO> getRecipesByDifficulty(@PathVariable String difficulty) {
         return recipeService.getRecipesByDifficulty(difficulty);
     }
 
     @GetMapping("/type/{type}")
-    public List<Recipe> getRecipesByType(@PathVariable String type) {
+    public List<RecipeDTO> getRecipesByType(@PathVariable String type) {
         return recipeService.getRecipesByType(type);
     }
 }

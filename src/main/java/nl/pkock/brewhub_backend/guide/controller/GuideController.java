@@ -1,9 +1,7 @@
 package nl.pkock.brewhub_backend.guide.controller;
 
-import nl.pkock.brewhub_backend.guide.models.Guide;
+import nl.pkock.brewhub_backend.guide.dto.*;
 import nl.pkock.brewhub_backend.guide.service.GuideService;
-import nl.pkock.brewhub_backend.guide.dto.CreateGuideRequest;
-import nl.pkock.brewhub_backend.guide.dto.UpdateGuideRequest;
 import nl.pkock.brewhub_backend.auth.security.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,18 +23,18 @@ public class GuideController {
     }
 
     @GetMapping
-    public List<Guide> getAllGuides() {
+    public List<GuideDTO> getAllGuides() {
         return guideService.getAllGuides();
     }
 
     @GetMapping("/{id}")
-    public Guide getGuideById(@PathVariable Long id) {
+    public GuideDTO getGuideById(@PathVariable Long id) {
         return guideService.getGuideById(id);
     }
 
     @PostMapping
     @PreAuthorize("hasRole('MODERATOR')")
-    public Guide createGuide(
+    public GuideDTO createGuide(
             @Valid @RequestBody CreateGuideRequest request,
             Authentication authentication
     ) {
@@ -46,7 +44,7 @@ public class GuideController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MODERATOR')")
-    public Guide updateGuide(
+    public GuideDTO updateGuide(
             @PathVariable Long id,
             @Valid @RequestBody UpdateGuideRequest request,
             Authentication authentication
@@ -63,12 +61,12 @@ public class GuideController {
     }
 
     @GetMapping("/search")
-    public List<Guide> searchGuides(@RequestParam String term) {
+    public List<GuideDTO> searchGuides(@RequestParam String term) {
         return guideService.searchGuides(term);
     }
 
     @GetMapping("/category/{category}")
-    public List<Guide> getGuidesByCategory(@PathVariable String category) {
+    public List<GuideDTO> getGuidesByCategory(@PathVariable String category) {
         return guideService.getGuidesByCategory(category);
     }
 }

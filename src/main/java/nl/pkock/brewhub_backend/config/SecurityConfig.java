@@ -5,6 +5,7 @@ import nl.pkock.brewhub_backend.auth.security.JwtAuthenticationFilter;
 import nl.pkock.brewhub_backend.auth.security.JwtTokenProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -43,10 +44,20 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // Public endpoints that don't require authentication
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/public/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/recipes/**", "/api/guides/**").permitAll()
+
+                        // Protected endpoints that require MODERATOR role
+                        .requestMatchers(HttpMethod.POST, "/api/recipes/**", "/api/guides/**").hasRole("MODERATOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/recipes/**", "/api/guides/**").hasRole("MODERATOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/recipes/**", "/api/guides/**").hasRole("MODERATOR")
+
+                        // Community endpoints require authentication
                         .requestMatchers("/api/community/**").authenticated()
                         .requestMatchers("/api/community/moderate/**").hasRole("MODERATOR")
+
+                        // All other endpoints require authentication by default
                         .anyRequest().authenticated()
                 );
 
