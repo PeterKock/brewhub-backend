@@ -40,13 +40,19 @@ class AnswerControllerIntegrationTest {
     @Autowired
     private ReportRepository reportRepository;
 
+    private User testUser;
+    private Question testQuestion;
     private static final long TEST_USER_ID = 1L;
-    private static final long TEST_ANSWER_ID = 1L;
-    private static final long TEST_QUESTION_ID = 1L;
 
     @BeforeEach
     void setUp() {
-        User testUser = new User();
+        // Clean up existing data
+        reportRepository.deleteAll();
+        answerRepository.deleteAll();
+        questionRepository.deleteAll();
+
+        // Create test user
+        testUser = new User();
         testUser.setId(TEST_USER_ID);
         testUser.setEmail("test@example.com");
         testUser.setFirstName("Test");
@@ -54,37 +60,28 @@ class AnswerControllerIntegrationTest {
         testUser.setPassword("testpassword");
         testUser.setRoles(Set.of(UserRole.USER));
 
-        LocalDateTime now = LocalDateTime.now();
-
-        Question testQuestion = new Question();
-        testQuestion.setId(TEST_QUESTION_ID);
-        testQuestion.setAuthor(testUser);
-        testQuestion.setTitle("Test Question");
-        testQuestion.setContent("Test content");
-        testQuestion.setCreatedAt(now);
-        testQuestion.setUpdatedAt(now);
-        testQuestion.setActive(true);
-        questionRepository.save(testQuestion);
-
-        Answer testAnswer = new Answer();
-        testAnswer.setId(TEST_ANSWER_ID);
-        testAnswer.setContent("Test content");
-        testAnswer.setAuthor(testUser);
-        testAnswer.setQuestion(testQuestion);
-        testAnswer.setActive(true);
-        testAnswer.setCreatedAt(now);
-        testAnswer.setUpdatedAt(now);
-        answerRepository.save(testAnswer);
-
+        // Set up security context
         UserPrincipal userPrincipal = UserPrincipal.create(testUser);
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(userPrincipal, null, userPrincipal.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // Create test question
+        testQuestion = new Question();
+        testQuestion.setAuthor(testUser);
+        testQuestion.setTitle("Test Question");
+        testQuestion.setContent("Test content");
+        testQuestion.setCreatedAt(LocalDateTime.now());
+        testQuestion.setUpdatedAt(LocalDateTime.now());
+        testQuestion.setActive(true);
+        testQuestion = questionRepository.save(testQuestion);
     }
 
     @Test
     void getAnswers_Success() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/community/answers/question/" + TEST_QUESTION_ID)
+        createTestAnswer();
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/community/answers/question/" + testQuestion.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
@@ -92,16 +89,13 @@ class AnswerControllerIntegrationTest {
 
     @Test
     void createAnswer_Success() throws Exception {
-        reportRepository.deleteAll();
-        answerRepository.deleteAll();
-
         String validContent = "This is a test answer that meets the minimum length requirement of 20 characters";
         String answerRequest = """
         {
             "content": "%s",
             "questionId": %d
         }
-        """.formatted(validContent, TEST_QUESTION_ID);
+        """.formatted(validContent, testQuestion.getId());
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/community/answers")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -112,15 +106,17 @@ class AnswerControllerIntegrationTest {
 
     @Test
     void updateAnswer_Success() throws Exception {
+        Answer testAnswer = createTestAnswer();
+
         String validContent = "This is an updated answer that meets the minimum length requirement";
         String updateRequest = """
             {
                 "content": "%s",
                 "questionId": %d
             }
-            """.formatted(validContent, TEST_QUESTION_ID);
+            """.formatted(validContent, testQuestion.getId());
 
-        mockMvc.perform(MockMvcRequestBuilders.put("/api/community/answers/" + TEST_ANSWER_ID)
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/community/answers/" + testAnswer.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateRequest))
                 .andExpect(status().isOk())
@@ -129,8 +125,10 @@ class AnswerControllerIntegrationTest {
 
     @Test
     void acceptAnswer_Success() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/community/answers/" + TEST_ANSWER_ID + "/accept")
-                        .param("questionId", String.valueOf(TEST_QUESTION_ID))
+        Answer testAnswer = createTestAnswer();
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/community/answers/" + testAnswer.getId() + "/accept")
+                        .param("questionId", String.valueOf(testQuestion.getId()))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accepted").value(true));
@@ -138,7 +136,9 @@ class AnswerControllerIntegrationTest {
 
     @Test
     void toggleVerifiedStatus_Success() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/community/answers/" + TEST_ANSWER_ID + "/verify")
+        Answer testAnswer = createTestAnswer();
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/community/answers/" + testAnswer.getId() + "/verify")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.verified").exists());
@@ -146,8 +146,21 @@ class AnswerControllerIntegrationTest {
 
     @Test
     void deleteAnswer_Success() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/community/answers/" + TEST_ANSWER_ID)
+        Answer testAnswer = createTestAnswer();
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/community/answers/" + testAnswer.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
+    }
+
+    private Answer createTestAnswer() {
+        Answer answer = new Answer();
+        answer.setContent("Test content");
+        answer.setAuthor(testUser);
+        answer.setQuestion(testQuestion);
+        answer.setActive(true);
+        answer.setCreatedAt(LocalDateTime.now());
+        answer.setUpdatedAt(LocalDateTime.now());
+        return answerRepository.save(answer);
     }
 }
